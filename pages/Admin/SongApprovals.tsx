@@ -42,6 +42,13 @@ const SongApprovals: React.FC = () => {
     return filteredSongs.slice(startIndex, startIndex + SONGS_PER_PAGE);
   }, [filteredSongs, currentPage]);
 
+  const paginationInfo = useMemo(() => {
+    const totalCount = filteredSongs.length;
+    if (totalCount === 0) return '';
+    const startIndex = (currentPage - 1) * SONGS_PER_PAGE + 1;
+    const endIndex = Math.min(currentPage * SONGS_PER_PAGE, totalCount);
+    return `Showing ${startIndex} to ${endIndex} of ${totalCount} songs`;
+  }, [filteredSongs.length, currentPage]);
 
   const handleApprove = (songId: string) => {
     if (!user) return;
@@ -124,11 +131,16 @@ const SongApprovals: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-              <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-              />
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-400 mt-8">
+                    {paginationInfo}
+                </span>
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+              </div>
             </>
           ) : (
             <div className="text-center py-8">

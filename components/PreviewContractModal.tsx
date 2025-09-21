@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Song, User } from '../types';
 import Modal from './ui/Modal';
@@ -17,7 +18,7 @@ const PreviewContractModal: React.FC<PreviewContractModalProps> = ({ isOpen, onC
         const submissionDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
         const writerNames = song.writers?.map(w => w.name).join(', ') || 'N/A';
         const artistNames = song.artists?.join(', ') || 'N/A';
-        const mockIpAddress = '8.8.8.8 (Simulated IP)'; 
+        const mockIpAddress = `192.168.1.${Math.floor(Math.random() * 254) + 1} (Simulated IP)`; 
 
         return contractTemplate
             .replace(/\[SONG_TITLE\]/g, song.title || 'Untitled')

@@ -1,44 +1,41 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
 import Card from '../components/ui/Card';
+import { UserRole } from '../types';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // This is a mock login. In a real app, you would call your API.
-    login({} as any); // Pass mock user data
+  const handleLogin = (role: UserRole) => {
+    login(role);
     navigate('/dashboard');
   };
 
   return (
     <div className="max-w-md mx-auto">
-      <Card title="Login to your Account">
-        <form onSubmit={handleLogin} className="space-y-6">
-          <Input
-            label="Email Address"
-            id="email"
-            type="email"
-            required
-            placeholder="you@example.com"
-          />
-          <Input
-            label="Password"
-            id="password"
-            type="password"
-            required
-            placeholder="••••••••"
-          />
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
-        </form>
+      <Card title="Select a Role to Login">
+        <div className="p-6 text-center">
+            <p className="text-gray-400 mb-6">For demonstration purposes, please select a user role to log in as.</p>
+            <div className="space-y-4">
+                <Button 
+                    onClick={() => handleLogin(UserRole.ADMIN)} 
+                    className="w-full"
+                    variant="primary"
+                >
+                    Login as Admin
+                </Button>
+                <Button 
+                    onClick={() => handleLogin(UserRole.ARTIST)} 
+                    className="w-full"
+                    variant="secondary"
+                >
+                    Login as Artist
+                </Button>
+            </div>
+        </div>
       </Card>
     </div>
   );

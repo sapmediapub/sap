@@ -1,3 +1,4 @@
+
 export enum UserRole {
   ARTIST = 'ARTIST',
   LABEL = 'LABEL',
@@ -26,6 +27,13 @@ export enum EarningSource {
   MECHANICAL = 'Mechanical',
   PERFORMANCE = 'Performance',
   NEIGHBOURING_RIGHTS = 'Neighbouring',
+}
+
+export enum PayoutStatus {
+  PENDING = 'Pending',
+  APPROVED = 'Approved',
+  PAID = 'Paid',
+  REJECTED = 'Rejected',
 }
 
 export type Platform = 'Spotify' | 'Apple Music' | 'YouTube' | 'Tidal' | 'Amazon Music' | 'Deezer';
@@ -100,6 +108,18 @@ export interface Song {
   rejection_reason?: string; // Added for rejection feedback
   revisionHistory?: Revision[];
   contract_text?: string;
+}
+
+export interface Payout {
+  id: string;
+  userId: string;
+  userName: string;
+  amount: number;
+  status: PayoutStatus;
+  requestedDate: string; // ISO 8601 date string
+  processedDate?: string; // ISO 8601 date string
+  payoutDetails: PayoutDetails; // A snapshot of details at time of request
+  rejectionReason?: string;
 }
 
 export interface SpotifyTrackData {

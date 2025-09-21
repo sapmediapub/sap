@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 const DetailRow: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
     <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4 border-t border-gray-700 first:border-t-0">
         <dt className="text-sm font-medium text-gray-400">{label}</dt>
-        <dd className="mt-1 text-sm text-white sm:mt-0 sm:col-span-2">{value}</dd>
+        <dd className="mt-1 text-sm text-white sm:mt-0 sm:col-span-2">{value || 'Not set'}</dd>
     </div>
 );
 
@@ -60,7 +60,7 @@ const Profile: React.FC = () => {
     };
 
     const handleCancel = () => {
-        setFormData(user);
+        setFormData(user ? { ...user, payoutDetails: user.payoutDetails || {} } : null);
         setIsEditing(false);
     };
 
@@ -138,6 +138,7 @@ const Profile: React.FC = () => {
                     <div className="space-y-4 p-6">
                         <Input label="Full Name" id="name" value={formData.name} onChange={(e) => handleChange('name', e.target.value)} required />
                         <Input label="Email Address (Cannot be changed)" id="email" value={formData.email} disabled readOnly />
+                        <Input label="Role (Cannot be changed)" id="role" value={formData.role} disabled readOnly />
                         <Input label="Country" id="country" value={formData.country} onChange={(e) => handleChange('country', e.target.value)} required />
                         <Select label="PRO" id="pro" value={formData.pro || ''} onChange={(e) => handleChange('pro', e.target.value)}>
                              <option value="">Select your PRO</option>
@@ -152,8 +153,8 @@ const Profile: React.FC = () => {
                             <DetailRow label="Email" value={user.email} />
                             <DetailRow label="Role" value={<span className="px-2 py-1 text-xs font-semibold rounded-full bg-indigo-900 text-indigo-200">{user.role}</span>} />
                             <DetailRow label="Country" value={user.country} />
-                            <DetailRow label="PRO" value={user.pro || 'Not set'} />
-                            <DetailRow label="IPI/CAE #" value={user.ipi_cae || 'Not set'} />
+                            <DetailRow label="PRO" value={user.pro} />
+                            <DetailRow label="IPI/CAE #" value={user.ipi_cae} />
                         </dl>
                     </div>
                 )}

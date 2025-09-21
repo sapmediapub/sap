@@ -86,7 +86,7 @@ const NewSong: React.FC = () => {
     if (!user) return;
 
     // In a real app, this would be captured from the server request.
-    const mockIpAddress = '8.8.8.8 (Simulated IP)'; 
+    const mockIpAddress = `192.168.1.${Math.floor(Math.random() * 254) + 1} (Simulated IP)`; 
 
     // Generate contract text
     const submissionDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

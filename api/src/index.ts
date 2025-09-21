@@ -9,9 +9,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // Middleware
-// FIX: Resolved a TypeScript overload error by splitting the middleware into separate app.use() calls.
 app.use(cors());
-app.use(express.json());
+// FIX: Corrected a TypeScript overload resolution error by passing an empty options object to express.json(). This helps resolve ambiguity in type inference for the JSON body parsing middleware.
+app.use(express.json({}));
 
 // Routes
 app.get('/', (req, res) => {

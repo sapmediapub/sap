@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Song, Earning } from '../../types';
@@ -8,11 +9,14 @@ import Button from '../../components/ui/Button';
 import AddEarningModal from '../../components/Admin/AddEarningModal';
 import { v4 as uuidv4 } from 'uuid';
 import { useSongs } from '../../contexts/SongContext';
+import Pagination from '../../components/ui/Pagination';
 
 const ManageEarnings: React.FC = () => {
   const { registeredSongs } = useSongs();
   const [earnings, setEarnings] = useState<Earning[]>(MOCK_SONG_EARNINGS);
   const [songToAddEarning, setSongToAddEarning] = useState<Song | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const songEarningsMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -32,6 +36,21 @@ const ManageEarnings: React.FC = () => {
     setEarnings(prev => [...prev, newEarning]);
     setSongToAddEarning(null); // Close modal
   };
+
+  const totalPages = Math.ceil(registeredSongs.length / ITEMS_PER_PAGE);
+
+  const paginatedSongs = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return registeredSongs.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [registeredSongs, currentPage]);
+
+  const paginationInfo = useMemo(() => {
+    const totalCount = registeredSongs.length;
+    if (totalCount === 0) return '';
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+    const endIndex = Math.min(currentPage * ITEMS_PER_PAGE, totalCount);
+    return `Showing ${startIndex} to ${endIndex} of ${totalCount} songs`;
+  }, [registeredSongs.length, currentPage]);
 
   return (
     <>
@@ -57,7 +76,7 @@ const ManageEarnings: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {registeredSongs.map(song => (
+                {paginatedSongs.map(song => (
                   <tr key={song.id} className="hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                       <Link to={`/songs/${song.id}`} className="hover:text-indigo-400 hover:underline">
@@ -78,6 +97,18 @@ const ManageEarnings: React.FC = () => {
               </tbody>
             </table>
           </div>
+          {registeredSongs.length > 0 && (
+             <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400 mt-8">
+                  {paginationInfo}
+              </span>
+              <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
         </Card>
       </div>
     </>

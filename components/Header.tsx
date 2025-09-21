@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -25,9 +26,15 @@ const Header: React.FC = () => {
                   <>
                     <NavLink to="/dashboard" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Dashboard</NavLink>
                     <NavLink to="/profile" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Profile</NavLink>
-                    <NavLink to="/songs/new" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Register Song</NavLink>
-                     <NavLink to="/earnings" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Earnings</NavLink>
-                    <NavLink to="/payouts" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Payouts</NavLink>
+                    
+                    {/* These links are for non-admin users only */}
+                    {user.role !== UserRole.ADMIN && (
+                      <>
+                        <NavLink to="/songs/new" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Register Song</NavLink>
+                        <NavLink to="/earnings" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Earnings</NavLink>
+                        <NavLink to="/payouts" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Payouts</NavLink>
+                      </>
+                    )}
                   </>
                 )}
                 {user && user.role === UserRole.ADMIN && (
@@ -36,6 +43,7 @@ const Header: React.FC = () => {
                     <NavLink to="/admin/users" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Users</NavLink>
                     <NavLink to="/admin/songs/approvals" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Approvals</NavLink>
                     <NavLink to="/admin/earnings" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Earnings</NavLink>
+                    <NavLink to="/admin/payouts" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Payout Manager</NavLink>
                     <NavLink to="/admin/contract" className={({ isActive }) => `${linkStyle} ${isActive ? activeLinkStyle : ''}`}>Contract</NavLink>
                   </>
                 )}

@@ -1,23 +1,50 @@
-import React, { useState } from 'react';
+
+import React, { useState, useMemo } from 'react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import PayoutRequestModal from '../components/PayoutRequestModal';
+import { usePayouts } from '../contexts/PayoutContext';
+import { useAuth } from '../hooks/useAuth';
+import { Payout, PayoutStatus } from '../types';
 
-const MOCK_PAYOUTS = [
-    { id: 'p1', date: '2024-04-20', amount: 1200.00, status: 'Paid', method: 'Bank Transfer' },
-    { id: 'p2', date: '2024-01-18', amount: 850.50, status: 'Paid', method: 'PayPal' },
-    { id: 'p3', date: '2023-10-15', amount: 1500.75, status: 'Paid', method: 'Bank Transfer' },
-];
-
-const AVAILABLE_BALANCE = 3456.78;
+const AVAILABLE_BALANCE = 3456.78; // This would come from an API in a real app
 
 const Payouts: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuth();
+  const { payouts, requestPayout } = usePayouts();
 
-  const handleRequestPayout = (data: any) => {
-    console.log('Payout requested:', data);
+  const userPayouts = useMemo(() => {
+    if (!user) return [];
+    // Sort by most recent first
+    return payouts.filter(p => p.userId === user.id).sort((a, b) => new Date(b.requestedDate).getTime() - new Date(a.requestedDate).getTime());
+  }, [payouts, user]);
+
+  const handleRequestPayout = (data: { amount: number; method: 'Bank' | 'PayPal' | 'MoMo', details: any }) => {
+    if (!user || !user.payoutDetails) {
+        alert("Please set up your payout details in your profile first.");
+        return;
+    }
+
+    const payoutDetails = {
+        preferredMethod: data.method,
+        ...data.details,
+    };
+    
+    requestPayout(parseFloat(data.amount.toString()), payoutDetails);
+    
     alert(`Payout request for $${data.amount} via ${data.method} submitted successfully!`);
     setIsModalOpen(false);
+  };
+  
+  const getStatusColor = (status: PayoutStatus) => {
+    switch (status) {
+      case PayoutStatus.PAID: return 'bg-green-900 text-green-200';
+      case PayoutStatus.APPROVED: return 'bg-blue-900 text-blue-200';
+      case PayoutStatus.PENDING: return 'bg-yellow-900 text-yellow-200';
+      case PayoutStatus.REJECTED: return 'bg-red-900 text-red-200';
+      default: return 'bg-gray-700 text-gray-200';
+    }
   };
 
   return (
@@ -49,19 +76,19 @@ const Payouts: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-800">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date Processed</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date Requested</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Method</th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
                 </tr>
               </thead>
               <tbody className="bg-gray-800 divide-y divide-gray-700">
-                {MOCK_PAYOUTS.map((payout) => (
+                {userPayouts.map((payout: Payout) => (
                   <tr key={payout.id} className="hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{payout.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{payout.method}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{new Date(payout.requestedDate).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{payout.payoutDetails.preferredMethod}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-900 text-green-200">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(payout.status)}`}>
                           {payout.status}
                       </span>
                     </td>

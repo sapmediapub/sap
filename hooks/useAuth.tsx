@@ -1,38 +1,26 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { User, UserRole, UserStatus } from '../types';
+import { User, UserRole } from '../types';
+import { MOCK_ADMIN_USER, MOCK_ARTIST_USER } from '../mockData';
 
 interface AuthContextType {
   user: User | null;
-  login: (user: User) => void;
+  login: (role: UserRole) => void;
   logout: () => void;
   updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const MOCK_USER: User = {
-  id: 'user-123',
-  name: 'Fela Kuti (Admin)',
-  email: 'fela.kuti@example.com',
-  role: UserRole.ADMIN,
-  country: 'Nigeria',
-  ipi_cae: '00123456789',
-  pro: 'PRS for Music',
-  status: UserStatus.ACTIVE,
-  payoutDetails: {
-    preferredMethod: 'Bank',
-    bankName: 'First Bank of Nigeria',
-    accountNumber: '1234567890',
-    swiftCode: 'FBNINGLA',
-  },
-};
-
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = () => {
-    // In a real app, you'd get user data from an API
-    setUser(MOCK_USER);
+  const login = (role: UserRole) => {
+    // In a real app, you'd get user data from an API based on credentials
+    if (role === UserRole.ADMIN) {
+      setUser(MOCK_ADMIN_USER);
+    } else {
+      setUser(MOCK_ARTIST_USER); // Default to artist for non-admin roles in this mock setup
+    }
   };
 
   const logout = () => {

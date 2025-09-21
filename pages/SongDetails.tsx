@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Song, UserRole, Writer, SongStatus } from '../types';
@@ -79,6 +80,7 @@ const SongDetails: React.FC = () => {
     if (oldSong.artists.join(', ') !== newSong.artists?.join(', ')) changes.push('Artists');
     if (oldSong.status !== newSong.status) changes.push('Status');
     if (oldSong.genre !== newSong.genre) changes.push('Genre');
+    if (oldSong.mood_tags.join(', ') !== newSong.mood_tags?.join(', ')) changes.push('Mood Tags');
     if (oldSong.isrc !== newSong.isrc) changes.push('ISRC');
     if (oldSong.release_date !== newSong.release_date) changes.push('Release Date');
     if (oldSong.album !== newSong.album) changes.push('Album');
@@ -179,6 +181,12 @@ const SongDetails: React.FC = () => {
                     <Select label="Genre" id="genre" value={editableSong.genre} onChange={e => handleDetailChange('genre', e.target.value)}>
                       {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
                     </Select>
+                    <Input 
+                        label="Mood Tags (comma-separated)"
+                        id="mood_tags"
+                        value={editableSong.mood_tags?.join(', ') || ''}
+                        onChange={e => handleDetailChange('mood_tags', e.target.value.split(',').map(s => s.trim()))}
+                    />
                     <Input label="ISRC" id="isrc" value={editableSong.isrc} onChange={e => handleDetailChange('isrc', e.target.value)} />
                     <Input label="Release Date" id="release_date" type="date" value={editableSong.release_date} onChange={e => handleDetailChange('release_date', e.target.value)} />
                     <Input label="Album" id="album" value={editableSong.album} onChange={e => handleDetailChange('album', e.target.value)} />
@@ -188,15 +196,26 @@ const SongDetails: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2">
-                      <DetailItem label="Status" value={<span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${originalSong.status === 'REGISTERED' ? 'bg-green-900 text-green-200' : originalSong.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' : 'bg-red-900 text-red-200'}`}>{originalSong.status}</span>} />
-                      <DetailItem label="Genre" value={originalSong.genre} />
-                      <DetailItem label="ISRC" value={<span className="font-mono bg-gray-700 px-2 py-0.5 rounded text-sm">{originalSong.isrc || 'N/A'}</span>} />
-                      <DetailItem label="Duration" value={`${Math.floor(originalSong.duration_ms / 60000)}:${('0' + Math.floor((originalSong.duration_ms % 60000) / 1000)).slice(-2)}`} />
-                      <DetailItem label="Release Date" value={originalSong.release_date} />
-                      <DetailItem label="Album" value={originalSong.album} />
-                      <DetailItem label="Sync Available" value={originalSong.available_for_sync ? 'Yes' : 'No'} />
-                      <DetailItem label="Submitted By" value={originalSong.ownerName} />
+                  <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                        <DetailItem label="Status" value={<span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${originalSong.status === 'REGISTERED' ? 'bg-green-900 text-green-200' : originalSong.status === 'PENDING' ? 'bg-yellow-900 text-yellow-200' : 'bg-red-900 text-red-200'}`}>{originalSong.status}</span>} />
+                        <DetailItem label="Genre" value={originalSong.genre} />
+                        <DetailItem label="ISRC" value={<span className="font-mono bg-gray-700 px-2 py-0.5 rounded text-sm">{originalSong.isrc || 'N/A'}</span>} />
+                        <DetailItem label="Duration" value={`${Math.floor(originalSong.duration_ms / 60000)}:${('0' + Math.floor((originalSong.duration_ms % 60000) / 1000)).slice(-2)}`} />
+                        <DetailItem label="Release Date" value={originalSong.release_date} />
+                        <DetailItem label="Album" value={originalSong.album} />
+                        <DetailItem label="Sync Available" value={originalSong.available_for_sync ? 'Yes' : 'No'} />
+                        <DetailItem label="Submitted By" value={originalSong.ownerName} />
+                      </div>
+                      <DetailItem label="Mood Tags" value={
+                        originalSong.mood_tags.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                                {originalSong.mood_tags.map(tag => (
+                                    <span key={tag} className="text-xs bg-indigo-900 text-indigo-200 px-2 py-1 rounded-full">{tag}</span>
+                                ))}
+                            </div>
+                        ) : 'N/A'
+                      } />
                   </div>
                 )}
                 <div className="mt-6 pt-4 border-t border-gray-600 flex justify-end gap-2">

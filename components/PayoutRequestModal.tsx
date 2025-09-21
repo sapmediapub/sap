@@ -1,26 +1,50 @@
-import React, 'react';
+
+import React from 'react';
 import Modal from './ui/Modal';
 import Input from './ui/Input';
 import Select from './ui/Select';
 import Button from './ui/Button';
+import { useAuth } from '../hooks/useAuth';
+import { PaymentMethod } from '../types';
 
 interface PayoutRequestModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: { amount: number; method: PaymentMethod, details: any }) => void;
   availableBalance: number;
 }
 
-type PaymentMethod = 'Bank' | 'PayPal' | 'MoMo';
 
 const PayoutRequestModal: React.FC<PayoutRequestModalProps> = ({ isOpen, onClose, onSubmit, availableBalance }) => {
-  const [method, setMethod] = React.useState<PaymentMethod>('Bank');
+  const { user } = useAuth();
+  const [method, setMethod] = React.useState<PaymentMethod>(user?.payoutDetails?.preferredMethod || 'Bank');
+  const [formData, setFormData] = React.useState({ ...user?.payoutDetails });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget as HTMLFormElement);
-    const data = Object.fromEntries(formData.entries());
-    onSubmit(data);
+    const form = e.currentTarget as HTMLFormElement;
+    const formElements = new FormData(form);
+    const amount = formElements.get('amount') as string;
+    
+    // Extract details based on the selected method
+    let details = {};
+    switch (method) {
+        case 'Bank':
+            details = { bankName: formData.bankName, accountNumber: formData.accountNumber, swiftCode: formData.swiftCode };
+            break;
+        case 'PayPal':
+            details = { paypalEmail: formData.paypalEmail };
+            break;
+        case 'MoMo':
+            details = { momoProvider: formData.momoProvider, momoNumber: formData.momoNumber };
+            break;
+    }
+
+    onSubmit({ amount: parseFloat(amount), method, details });
+  };
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({...prev, [field]: value}));
   };
 
   const renderMethodFields = () => {
@@ -28,18 +52,18 @@ const PayoutRequestModal: React.FC<PayoutRequestModalProps> = ({ isOpen, onClose
       case 'Bank':
         return (
           <>
-            <Input label="Bank Name" id="bankName" name="bankName" required />
-            <Input label="Account Number" id="accountNumber" name="accountNumber" required />
-            <Input label="SWIFT / BIC Code" id="swiftCode" name="swiftCode" required />
+            <Input label="Bank Name" id="bankName" name="bankName" value={formData.bankName || ''} onChange={(e) => handleFieldChange('bankName', e.target.value)} required />
+            <Input label="Account Number" id="accountNumber" name="accountNumber" value={formData.accountNumber || ''} onChange={(e) => handleFieldChange('accountNumber', e.target.value)} required />
+            <Input label="SWIFT / BIC Code" id="swiftCode" name="swiftCode" value={formData.swiftCode || ''} onChange={(e) => handleFieldChange('swiftCode', e.target.value)} required />
           </>
         );
       case 'PayPal':
-        return <Input label="PayPal Email" id="paypalEmail" name="paypalEmail" type="email" required />;
+        return <Input label="PayPal Email" id="paypalEmail" name="paypalEmail" type="email" value={formData.paypalEmail || ''} onChange={(e) => handleFieldChange('paypalEmail', e.target.value)} required />;
       case 'MoMo':
         return (
           <>
-            <Input label="Mobile Money Provider" id="momoProvider" name="momoProvider" placeholder="e.g., MTN, Vodafone" required />
-            <Input label="Phone Number" id="momoNumber" name="momoNumber" type="tel" required />
+            <Input label="Mobile Money Provider" id="momoProvider" name="momoProvider" value={formData.momoProvider || ''} placeholder="e.g., MTN, Vodafone" onChange={(e) => handleFieldChange('momoProvider', e.target.value)} required />
+            <Input label="Phone Number" id="momoNumber" name="momoNumber" type="tel" value={formData.momoNumber || ''} onChange={(e) => handleFieldChange('momoNumber', e.target.value)} required />
           </>
         );
       default:
